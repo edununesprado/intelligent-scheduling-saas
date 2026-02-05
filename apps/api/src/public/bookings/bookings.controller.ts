@@ -7,6 +7,17 @@ import { Patch } from '@nestjs/common';
 export class BookingsController {
     constructor(private readonly bookings: BookingsService) {}
 
+    /**
+     * Cria um novo agendamento público para um salão.
+     *
+     * @param slug Identificador único do salão (ex: salao-bela-arte)
+     * @param body Dados do agendamento (profissional, serviço, cliente, horário)
+     *
+     * Regras:
+     * - Horário deve estar disponível
+     * - Considera bloqueios e agendamentos existentes
+     * - Retorna datas no fuso America/Sao_Paulo
+    */
     @Post('tenants/:slug/bookings')
     create(@Param('slug') slug: string, @Body() dto: CreateBookingDto) {
         if (!slug) throw new BadRequestException('slug obrigatório');
