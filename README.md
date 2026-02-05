@@ -33,16 +33,19 @@ Fluxo principal do sistema:
 
 Projeto organizado como **monorepo**:
 
+```text
 projeto_agendamento/
 ├─ apps/
-│ └─ api/ # Backend NestJS
-│ ├─ prisma/ # Schema, migrations e seed
-│ ├─ src/
-│ │ ├─ admin/ # Rotas protegidas (JWT)
-│ │ ├─ auth/ # Autenticação JWT
-│ │ ├─ prisma/ # PrismaService
-│ │ └─ public/ # Rotas públicas (agendamento)
-│ └─ main.ts
+│  └─ api/
+│     ├─ prisma/            # Schema, migrations e seed
+│     ├─ src/
+│     │  ├─ admin/          # Rotas protegidas (JWT)
+│     │  ├─ auth/           # Autenticação JWT
+│     │  ├─ prisma/         # PrismaService
+│     │  ├─ public/         # Rotas públicas (agendamento)
+│     │  ├─ app.module.ts
+│     │  └─ main.ts
+│     └─ package.json
 ├─ pnpm-workspace.yaml
 └─ README.md
 
