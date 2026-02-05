@@ -1,0 +1,17 @@
+{
+  "name": "projeto_agendamento",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "turbo": "^2.8.0"
+  }
+}

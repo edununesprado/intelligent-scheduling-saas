@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  logoUrl      String?
+  primaryColor String?
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  services      Service[]
+  adminUsers    AdminUser[]
+  professionals Professional[]
+
+  availabilityRules AvailabilityRule[]
+  timeOffs          TimeOff[]
+  bookings          Booking[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  durationMin Int
+  priceCents  Int?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  bookings Booking[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  name         String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Professional {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  email     String?
+  phone     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  availabilityRules AvailabilityRule[]
+  timeOffs          TimeOff[]
+  bookings          Booking[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model AvailabilityRule {
+  id             String   @id @default(cuid())
+  tenantId       String
+  professionalId String
+  dayOfWeek      Int // 0=domingo ... 6=sábado
+  startMin       Int // minutos desde 00:00 (ex: 9:00 = 540)
+  endMin         Int // ex: 18:00 = 1080
+  intervalMin    Int      @default(30) // passo de geração
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+
+  @@index([tenantId, professionalId])
+  @@index([professionalId, dayOfWeek])
+}
+
+model TimeOff {
+  id             String   @id @default(cuid())
+  tenantId       String
+  professionalId String
+  startAt        DateTime
+  endAt          DateTime
+  reason         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+
+  @@index([tenantId, professionalId])
+  @@index([professionalId, startAt, endAt])
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  tenantId       String
+  professionalId String
+  serviceId      String
+  customerName   String
+  customerPhone  String?
+  startAt        DateTime
+  endAt          DateTime
+  status         String   @default("CONFIRMED") // MVP
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+  service      Service      @relation(fields: [serviceId], references: [id])
+
+  @@index([tenantId, professionalId])
+  @@index([professionalId, startAt, endAt])
+  @@unique([tenantId, professionalId, startAt])
+}
